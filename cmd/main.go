@@ -39,12 +39,12 @@ func main() {
 
 		// binding the user data
 		if err := c.Bind(u); err != nil {
-			return err
+			return c.JSON(http.StatusBadRequest, map[string]any{"error": err.Error()})
 		}
 
 		// validating the user data
 		if err := c.Validate(u); err != nil {
-			return c.JSON()
+			return c.JSON(http.StatusBadRequest, map[string]any{"error": err.Error()})
 		}
 
 		// Process the user data (e.g., save to database)
