@@ -34,6 +34,8 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
+	e.Validator = &CustomValidator{validator: validator.New()}
+
 	e.POST("/users", func(c *echo.Context) error {
 		u := new(User)
 
@@ -47,7 +49,7 @@ func main() {
 			return c.JSON(http.StatusBadRequest, map[string]any{"error": err.Error()})
 		}
 
-		// Process the user data (e.g., save to database)
+		// save to database
 
 		return c.JSON(http.StatusCreated, u)
 		// or
