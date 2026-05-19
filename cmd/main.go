@@ -9,9 +9,9 @@ import (
 )
 
 type User struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
 }
 
 type CustomValidator struct {
@@ -44,7 +44,7 @@ func main() {
 
 		// validating the user data
 		if err := c.Validate(u); err != nil {
-			return err
+			return c.JSON()
 		}
 
 		// Process the user data (e.g., save to database)
