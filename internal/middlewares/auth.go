@@ -23,7 +23,7 @@ func AuthMiddleware(jwtService auth.JWTService) echo.MiddlewareFunc {
 			// check bearer scheme
 			parts := strings.Split(authHeader, " ")
 
-			if len(parts) != 2 || parts[0] != "bearer" {
+			if len(parts) != 2 || parts[0] != "Bearer" {
 				return c.JSON(http.StatusUnauthorized, map[string]string{
 					"error": "invalid authorization header format",
 				})
