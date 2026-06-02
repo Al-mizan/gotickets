@@ -18,7 +18,6 @@ type repository struct {
 }
 
 func NewRepository(db *gorm.DB) Repository {
-
 	return &repository{
 		db: db,
 	}
