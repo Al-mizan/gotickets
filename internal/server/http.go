@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"gotickets/internal/booking"
 	"gotickets/internal/config"
 	"gotickets/internal/event"
 	"gotickets/internal/user"
@@ -26,7 +27,7 @@ func (cv *CustomValidator) Validate(i any) error {
 }
 
 func Start(db *gorm.DB, cfg *config.Config) {
-	db.AutoMigrate(&user.User{}, &event.Event{})
+	db.AutoMigrate(&user.User{}, &event.Event{}, &booking.Booking{})
 
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
@@ -36,7 +37,7 @@ func Start(db *gorm.DB, cfg *config.Config) {
 		return c.String(http.StatusOK, "ok")
 	})
 
-	// user routes
+	//routes
 	user.RegisterRoutes(e, db)
 	event.RegisterRoutes(e, db)
 
