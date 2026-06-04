@@ -38,9 +38,9 @@ func Start(db *gorm.DB, cfg *config.Config) {
 	})
 
 	//routes
-	user.RegisterRoutes(e, db)
+	user.RegisterRoutes(e, db, cfg)
 	event.RegisterRoutes(e, db)
-	booking.RegisterRoutes(e, db)
+	booking.RegisterRoutes(e, db, cfg)
 
 	port := fmt.Sprintf(":%s", cfg.Port)
 	if err := e.Start(port); err != nil {
