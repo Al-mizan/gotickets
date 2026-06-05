@@ -32,13 +32,18 @@ gotickets/
 │   └── main.go                 # Application entry point
 ├── internal/
 │   ├── auth/                   # JWT token create/validate logic
-│   ├── booking/                # Booking feature
 │   ├── config/                 # Environment and database config
-│   ├── event/                  # Event feature
+│   ├── domain/
+│   │   ├── booking/            # Booking feature
+│   │   │   └── dto/            # Booking request/response DTOs
+│   │   ├── event/              # Event feature
+│   │   │   └── dto/            # Event request/response DTOs
+│   │   └── user/               # User auth/profile feature
+│   │       └── dto/            # User request/response DTOs
 │   ├── httpresponse/           # Common error response shape
 │   ├── middlewares/            # Auth middleware
-│   ├── server/                 # Echo server setup
-│   └── user/                   # User register/login feature
+│   └── server/                 # Echo server setup
+├── .air.toml                   # Air config for live reload
 ├── .env.example                # Example environment variables
 ├── go.mod                      # Go module and dependencies
 └── go.sum
@@ -127,6 +132,12 @@ Start the server:
 go run cmd/main.go
 ```
 
+Or, if you are using Air for live reload:
+
+```bash
+air
+```
+
 If everything is okay, the server will start on:
 
 ```text
@@ -142,7 +153,35 @@ curl http://localhost:8080/health
 Expected response:
 
 ```text
-ok
+running
+```
+
+## Build The Project
+
+Create a local binary:
+
+```bash
+go build -o bin/gotickets ./cmd/main.go
+```
+
+Run the binary:
+
+```bash
+./bin/gotickets
+```
+
+For a smaller production-style binary:
+
+```bash
+CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/gotickets ./cmd/main.go
+```
+
+Before building for production, it is a good habit to run:
+
+```bash
+go mod tidy
+go test ./...
+go vet ./...
 ```
 
 ## API Routes
@@ -312,6 +351,10 @@ This package reads values from `.env` and creates the database connection.
 
 This package creates the Echo app, adds middleware, registers routes, and starts listening on the selected port.
 
+### `internal/domain`
+
+This folder contains the main business domains: user, event, and booking. Each domain has its own handler, service, repository, entity, route registration, and DTOs.
+
 ### Handler
 
 A handler receives an HTTP request. It usually does these things:
@@ -380,23 +423,12 @@ If you are new to Go, read the project in this order:
 2. `internal/config/config.go`
 3. `internal/config/db.go`
 4. `internal/server/http.go`
-5. `internal/user/register.go`
-6. `internal/user/handler.go`
-7. `internal/user/service.go`
-8. `internal/user/repository.go`
-9. `internal/event`
-10. `internal/booking`
+5. `internal/domain/user/register.go`
+6. `internal/domain/user/handler.go`
+7. `internal/domain/user/service.go`
+8. `internal/domain/user/repository.go`
+9. `internal/domain/event`
+10. `internal/domain/booking`
 
 This order helps you understand how the app starts, then how one feature works from route to database.
 
-## Notes
-
-This project is for learning. Some ideas you can add later:
-
-- Delete event route
-- Cancel booking route
-- Admin-only event routes
-- Unit tests
-- Docker setup
-- Better error messages
-- Pagination for events
