@@ -20,7 +20,7 @@ type Repository interface {
 	GetByID(bookingId uint) (*Booking, error)
 	GetByUserID(userId uint) ([]*Booking, error)
 	Update(booking *Booking) error
-	CreateWithTicketUpdate(userId uint, eventId uint, quantity uint) (*Booking, error)
+	CreateWithTicketUpdate(userId uint, eventId uint, quantity int) (*Booking, error)
 }
 
 type repository struct {
