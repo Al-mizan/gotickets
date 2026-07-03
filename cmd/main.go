@@ -12,5 +12,4 @@ func main() {
 	db := config.ConnectDatabase(cfg)
 	// start the server
 	server.Start(db, cfg)
-
 }
