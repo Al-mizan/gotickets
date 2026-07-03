@@ -8,6 +8,13 @@ import (
 
 var ErrInvalidCredentials = fmt.Errorf("invalid email or password")
 
+// improve: add interface for service to make it easier to test and mock
+
+// type Service interface {
+// 	CreateUser(req dto.CreateRequest) (*dto.Response, error)
+// 	LoginUser(req dto.LoginRequest) (*dto.Response, error)
+// }
+
 type service struct {
 	repo       Repository
 	jwtService auth.JWTService

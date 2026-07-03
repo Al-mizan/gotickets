@@ -9,6 +9,9 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
+// improve: add interface for handler to make it easier to test and mock
+
+
 type handler struct {
 	service *service
 }

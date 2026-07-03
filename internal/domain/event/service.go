@@ -6,6 +6,9 @@ type service struct {
 	repo Repository
 }
 
+// improve: add interface for service to make it easier to test and mock
+
+
 func NewService(repo Repository) *service {
 	return &service{repo: repo}
 }
