@@ -1,15 +1,23 @@
 package event
 
-import "gotickets/internal/domain/event/dto"
+import (
+	"errors"
+	"gotickets/internal/apperror"
+	"gotickets/internal/domain/event/dto"
+)
+
+type Service interface {
+	CreateEvent(req dto.CreateRequest) (*dto.Response, error)
+	GetEvents() ([]dto.Response, error)
+	GetEventByID(eventId uint) (*dto.Response, error)
+	UpdateEvent(eventId uint, req dto.UpdateRequest) (*dto.Response, error)
+}
 
 type service struct {
 	repo Repository
 }
 
-// improve: add interface for service to make it easier to test and mock
-
-
-func NewService(repo Repository) *service {
+func NewService(repo Repository) Service {
 	return &service{repo: repo}
 }
 
@@ -25,7 +33,7 @@ func (s *service) CreateEvent(req dto.CreateRequest) (*dto.Response, error) {
 	}
 
 	if err := s.repo.Create(&event); err != nil {
-		return nil, err
+		return nil, apperror.NewInternal(err, "failed to create event")
 	}
 
 	return event.ToResponse(), nil
@@ -34,14 +42,11 @@ func (s *service) CreateEvent(req dto.CreateRequest) (*dto.Response, error) {
 
 func (s *service) GetEvents() ([]dto.Response, error) {
 	events, err := s.repo.GetAll()
-
 	if err != nil {
-		return nil, err
+		return nil, apperror.NewInternal(err, "failed to fetch events")
 	}
 
-	// responses := make([]dto.Response, len(events))
-
-	var responses []dto.Response
+	responses := make([]dto.Response, 0, len(events))
 
 	for _, event := range events {
 		responses = append(responses, *event.ToResponse())
@@ -52,9 +57,11 @@ func (s *service) GetEvents() ([]dto.Response, error) {
 
 func (s *service) GetEventByID(eventId uint) (*dto.Response, error) {
 	event, err := s.repo.GetByID(eventId)
-
 	if err != nil {
-		return nil, err
+		if errors.Is(err, ErrEventNotFound) {
+			return nil, apperror.NewNotFound(err, "event not found")
+		}
+		return nil, apperror.NewInternal(err, "failed to fetch event")
 	}
 
 	return event.ToResponse(), nil
@@ -63,7 +70,10 @@ func (s *service) GetEventByID(eventId uint) (*dto.Response, error) {
 func (s *service) UpdateEvent(eventId uint, req dto.UpdateRequest) (*dto.Response, error) {
 	event, err := s.repo.GetByID(eventId) // getting existing event by the id first
 	if err != nil {
-		return nil, err
+		if errors.Is(err, ErrEventNotFound) {
+			return nil, apperror.NewNotFound(err, "event not found")
+		}
+		return nil, apperror.NewInternal(err, "failed to fetch event")
 	}
 
 	if req.Title != "" {
@@ -87,7 +97,7 @@ func (s *service) UpdateEvent(eventId uint, req dto.UpdateRequest) (*dto.Respons
 	}
 
 	if err := s.repo.Update(event); err != nil {
-		return nil, err
+		return nil, apperror.NewInternal(err, "failed to update event")
 	}
 
 	return event.ToResponse(), nil

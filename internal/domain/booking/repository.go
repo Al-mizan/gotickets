@@ -20,7 +20,7 @@ type Repository interface {
 	GetByID(bookingId uint) (*Booking, error)
 	GetByUserID(userId uint) ([]*Booking, error)
 	Update(booking *Booking) error
-	CreateWithTicketUpdate(userId uint, eventId uint, quantity int) (*Booking, error)
+	CreateWithTicketUpdate(booking *Booking) error
 }
 
 type repository struct {
@@ -65,15 +65,12 @@ func (r *repository) Update(booking *Booking) error {
 	return r.db.Save(booking).Error
 }
 
-func (r *repository) CreateWithTicketUpdate(userId uint, eventId uint, quantity int) (*Booking, error) {
-	var booking Booking
-
+func (r *repository) CreateWithTicketUpdate(booking *Booking) error {
 	// start transaction
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-
+	return r.db.Transaction(func(tx *gorm.DB) error {
 		var eventData event.Event
 
-		err := tx.Clauses(clause.Locking{Strength: "Update"}).First(&eventData, eventId).Error
+		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&eventData, booking.EventID).Error
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return event.ErrEventNotFound
@@ -81,36 +78,21 @@ func (r *repository) CreateWithTicketUpdate(userId uint, eventId uint, quantity 
 			return err
 		}
 
-		if eventData.AvailableTickets < int(quantity) {
+		if eventData.AvailableTickets < booking.Quantity {
 			return ErrNotEnoughTickets
 		}
 
-		booking = Booking{
-			UserID:      userId,
-			EventID:     eventData.ID,
-			Quantity:    quantity,
-			Status:      BookingConfirmed,
-			TotalPrice:  quantity * eventData.Price,
-			BookingCode: generateBookingCode(),
-		}
+		booking.TotalPrice = booking.Quantity * eventData.Price
 
-		if err := tx.Create(&booking).Error; err != nil {
+		if err := tx.Create(booking).Error; err != nil {
 			return err
 		}
 
-		eventData.AvailableTickets = eventData.AvailableTickets - int(quantity)
+		eventData.AvailableTickets -= booking.Quantity
 		if err := tx.Save(&eventData).Error; err != nil {
 			return err
 		}
 
 		return nil
-
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &booking, nil
-
 }

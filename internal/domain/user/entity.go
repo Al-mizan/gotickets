@@ -7,9 +7,9 @@ import (
 
 type User struct {
 	gorm.Model
-	Name     string `json:"name"  gorm:"type:varchar(100);not null"`
-	Email    string `json:"email"  gorm:"type:varchar(255);uniqueIndex;not null"`
-	Password string `json:"password"  gorm:"type:varchar(100);not null"`
+	Name     string `gorm:"type:varchar(100);not null"`
+	Email    string `gorm:"type:varchar(255);uniqueIndex;not null"`
+	Password string `gorm:"type:varchar(100);not null"`
 }
 
 func (u *User) hashPassword(password string) error {

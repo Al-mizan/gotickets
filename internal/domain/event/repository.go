@@ -24,16 +24,7 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 func (r *repository) Create(event *Event) error {
-	// result := r.db.Create(event)
-
-	// if result.Error != nil {
-	// 	return result.Error
-	// }
-
-	// return nil
-
 	return r.db.Create(event).Error
-
 }
 
 func (r *repository) GetAll() ([]*Event, error) {

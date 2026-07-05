@@ -3,13 +3,25 @@ package main
 import (
 	"gotickets/internal/config"
 	"gotickets/internal/server"
+	"log/slog"
+	"os"
 )
 
 func main() {
 	// load environment variables
-	cfg := config.LoadEnv()
+	cfg, err := config.LoadEnv()
+	if err != nil {
+		slog.Error("failed to load config", "error", err)
+		os.Exit(1)
+	}
+
 	// connect to the database
-	db := config.ConnectDatabase(cfg)
+	db, err := config.ConnectDatabase(cfg)
+	if err != nil {
+		slog.Error("failed to connect database", "error", err)
+		os.Exit(1)
+	}
+
 	// start the server
 	server.Start(db, cfg)
 }

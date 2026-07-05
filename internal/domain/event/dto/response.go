@@ -11,5 +11,5 @@ type Response struct {
 	TotalTickets     int       `json:"total_tickets"`
 	AvailableTickets int       `json:"available_tickets"`
 	Price            int       `json:"price"`
-	CreatedAt        string    `json:"created_at"`
+	CreatedAt        time.Time `json:"created_at"`
 }
